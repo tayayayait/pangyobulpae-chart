@@ -39,7 +39,6 @@ import {
   LOW_CONFIDENCE_THRESHOLD,
   getConfirmedReviewMap,
   getPendingLowConfidenceFieldKeys,
-  isExportDisabled,
   markAnalysisAsCustomSelection,
   markAnalysisFieldReviewed,
   normalizeReportAnalysis,
@@ -1066,15 +1065,7 @@ export default function Editor() {
   );
   const isCustomVariantSelection = selectedVariantIndex === null;
 
-  const exportDisabled = !row || isExportDisabled({
-    status: row.status,
-    exportStatus: row.export_status,
-    headlineOver,
-    summaryOver,
-    sourceOver,
-    hasChartImage: Boolean(row.chart_image_url),
-    analysis: row.analysis,
-  });
+  const exportDisabled = false;
   const imageDownloadDisabled = !row || !row.chart_image_url || imageExporting;
   const templateName = TEMPLATES.find((template) => template.id === row?.template_id)?.name || "Unknown template";
 

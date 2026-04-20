@@ -1,0 +1,10 @@
+project_id = "wpcolzucohrwgxmquyoc"
+
+[functions.analyze-chart]
+verify_jwt = false
+
+[functions.regenerate-summary]
+verify_jwt = true
+
+[functions.export-pptx]
+verify_jwt = false

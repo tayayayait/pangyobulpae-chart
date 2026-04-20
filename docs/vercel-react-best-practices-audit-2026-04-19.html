@@ -1,0 +1,273 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vercel React Best Practices 감사 보고서</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2b;
+      --panel-2: #0f1626;
+      --text: #e8edf8;
+      --muted: #9fb0cf;
+      --line: #273554;
+      --critical: #ff5d5d;
+      --high: #ff9d43;
+      --medium: #ffd166;
+      --ok: #5dd39e;
+      --link: #7fb3ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background: linear-gradient(180deg, #0b1020 0%, #0a0f1c 100%);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 20px 56px;
+    }
+    h1, h2, h3 { margin: 0; }
+    .header {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+      margin-bottom: 16px;
+    }
+    .meta {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      display: grid;
+      gap: 2px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-2);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #0e1526;
+    }
+    .kpi .label { color: var(--muted); font-size: 13px; }
+    .kpi .value { font-size: 22px; font-weight: 700; margin-top: 2px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th { background: #152038; }
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12.5px;
+      color: #d7e6ff;
+      word-break: break-word;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .critical { background: color-mix(in srgb, var(--critical) 20%, transparent); color: #ffbcbc; }
+    .high { background: color-mix(in srgb, var(--high) 20%, transparent); color: #ffd0a1; }
+    .medium { background: color-mix(in srgb, var(--medium) 20%, transparent); color: #ffe7ab; }
+    .ok { background: color-mix(in srgb, var(--ok) 20%, transparent); color: #b9f3d7; }
+    ul { margin: 8px 0 0; padding-left: 20px; }
+    li { margin: 4px 0; }
+    .muted { color: var(--muted); }
+    a { color: var(--link); }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="header">
+      <h1>Vercel React Best Practices 감사 보고서</h1>
+      <div class="meta">
+        <div>프로젝트: <code>C:\Users\dbcdk\Desktop\chart</code></div>
+        <div>작성일: <code>2026-04-19</code> (Asia/Seoul)</div>
+        <div>기준: <code>vercel-react-best-practices</code> (Waterfalls/Bundle/Client Data/Re-render/Rendering/JS)</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>1. 실행 요약</h2>
+      <div class="grid" style="margin-top: 12px;">
+        <div class="kpi">
+          <div class="label">프로덕션 JS 청크</div>
+          <div class="value">619.37 kB</div>
+          <div class="muted">gzip 188.07 kB</div>
+        </div>
+        <div class="kpi">
+          <div class="label">빌드 경고</div>
+          <div class="value">500 kB 초과</div>
+          <div class="muted">Vite chunk size warning 발생</div>
+        </div>
+        <div class="kpi">
+          <div class="label">핵심 수정 우선순위</div>
+          <div class="value">CRITICAL 2건</div>
+          <div class="muted">즉시 착수 권장</div>
+        </div>
+        <div class="kpi">
+          <div class="label">확인 불가 지표</div>
+          <div class="value">확실한 정보 없음</div>
+          <div class="muted">RUM 기반 FCP/LCP/INP 데이터 미수집</div>
+        </div>
+      </div>
+      <ul>
+        <li>사실 기반 결론: 현재 엔트리 청크가 과대하며 라우트 코드 스플리팅이 적용되지 않았습니다.</li>
+        <li>사실 기반 결론: 뷰포트 감시 로직이 여러 화면에서 중복되어 resize 이벤트가 분산 등록됩니다.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>2. 증거 로그</h2>
+      <ul>
+        <li>빌드 결과: <code>dist/assets/index-ANp4H6wZ.js 619.37 kB</code>, Vite 500 kB 경고 출력 확인.</li>
+        <li>정적 라우트 import: <code>src/App.tsx:7-9</code> (<code>Auth</code>, <code>Reports</code>, <code>Editor</code> 동시 로드).</li>
+        <li>resize 리스너 등록: <code>src/App.tsx:22</code>, <code>src/pages/Reports.tsx:98</code>, <code>src/pages/Editor.tsx:427</code>.</li>
+        <li>대형 단일 페이지 컴포넌트: <code>src/pages/Editor.tsx</code> 총 <code>1382 lines</code>.</li>
+        <li>리스트 이미지 지연 로드 미적용: <code>src/pages/Reports.tsx:201</code> (카드 이미지 <code>&lt;img&gt;</code>).</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>3. 우선순위별 개선 과제</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>우선순위</th>
+            <th>규칙</th>
+            <th>현재 상태</th>
+            <th>해야 할 작업</th>
+            <th>완료 기준</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge critical">CRITICAL</span></td>
+            <td><code>bundle-dynamic-imports</code></td>
+            <td>
+              <code>src/App.tsx:7-9</code>에서 주요 라우트 정적 import.
+              초기 번들 619.37 kB.
+            </td>
+            <td>
+              라우트 컴포넌트를 <code>React.lazy + Suspense</code>로 분리.
+              최소 대상: <code>Editor</code>, <code>Reports</code>, <code>Auth</code>.
+            </td>
+            <td>
+              초기 엔트리 청크가 500 kB 경고 임계치 이하로 감소하거나,
+              라우트별 분할 청크가 생성되어 경고가 제거될 것.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge critical">CRITICAL</span></td>
+            <td><code>bundle-conditional</code></td>
+            <td>
+              내비게이션 진입 시 편집기 관련 대형 코드가 함께 번들될 가능성 높음
+              (<code>Editor.tsx</code> 1382 lines).
+            </td>
+            <td>
+              편집기 전용 UI 블록(예: Export 관련 모달/로직, 대형 패널)을 기능 진입 시점 조건부 로드로 분리.
+            </td>
+            <td>
+              <code>/reports</code> 진입 시 다운로드되는 JS 용량이 명확히 감소하고,
+              분리 청크가 네트워크 탭에서 확인될 것.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge high">HIGH</span></td>
+            <td><code>client-event-listeners</code></td>
+            <td>
+              resize 리스너가 3개 파일에서 개별 등록됨
+              (<code>App.tsx:22</code>, <code>Reports.tsx:98</code>, <code>Editor.tsx:427</code>).
+            </td>
+            <td>
+              공통 훅 1개로 통합하고, 필요한 컴포넌트만 구독.
+              가능한 경우 CSS media query로 대체해 JS 리스너 자체를 축소.
+            </td>
+            <td>
+              전역 resize 핸들러 등록 수가 감소하고,
+              뷰포트 변경 시 불필요 리렌더 횟수가 줄어들 것.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td><code>rerender-memo</code>, <code>rerender-no-inline-components</code></td>
+            <td>
+              <code>Editor.tsx</code> 단일 컴포넌트에 상태/렌더링/네트워크 로직이 집중됨.
+            </td>
+            <td>
+              좌측 패널/프리뷰/우측 패널을 분리 컴포넌트화하고,
+              props 안정화(<code>useMemo</code>, <code>useCallback</code>) 적용.
+            </td>
+            <td>
+              입력 1회당 렌더링되는 하위 트리 수가 감소하고,
+              React DevTools 프로파일에서 커밋 시간이 단축될 것.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td><code>rendering-content-visibility</code> (적용 후보)</td>
+            <td>
+              카드 목록 이미지가 즉시 로드됨
+              (<code>src/pages/Reports.tsx:201</code>).
+            </td>
+            <td>
+              카드 이미지에 <code>loading="lazy" decoding="async"</code>를 적용하고,
+              긴 목록 컨테이너에 <code>content-visibility: auto</code> 적용 검토.
+            </td>
+            <td>
+              초기 스크롤 구간 외 이미지 네트워크 요청이 지연되고,
+              첫 렌더링 구간의 페인트 비용이 감소할 것.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>4. 비적용/판정 보류 항목</h2>
+      <ul>
+        <li><code>server-*</code> 카테고리: 본 프로젝트는 Next.js 서버 컴포넌트 기반이 아니므로 직접 적용 대상 아님.</li>
+        <li><code>async-parallel</code>: 독립 요청 병렬화 여지는 추가 검토 필요. 현재 로그만으로 확정 위반 판정 불가.</li>
+        <li>실사용 성능 지표(FCP/LCP/INP): 측정 데이터가 없어 <strong>확실한 정보 없음</strong>.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>5. 권장 실행 순서</h2>
+      <ol>
+        <li><code>App.tsx</code> 라우트 lazy 로딩 적용 후 빌드 크기 재측정.</li>
+        <li><code>Editor.tsx</code> 분할(패널 단위) + 조건부 로드 적용.</li>
+        <li>resize 구독 통합 훅 적용 및 기존 개별 리스너 제거.</li>
+        <li>리포트 카드 이미지 lazy/decoding 적용.</li>
+        <li>변경 후 동일 명령으로 빌드 재실행하여 청크 크기 비교.</li>
+      </ol>
+    </section>
+  </main>
+</body>
+</html>
